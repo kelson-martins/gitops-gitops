@@ -26,8 +26,8 @@ pipeline {
       sh'''
         rm drift-report.txt
         echo "no drift reports, all uptodate" > no-drift.txt
-        archiveArtifacts artifacts: '*.txt'
       '''
+      archiveArtifacts artifacts: '*.txt'
     }
   }
 }
