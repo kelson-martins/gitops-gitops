@@ -1,0 +1,33 @@
+pipeline {
+  triggers {
+    pollSCM('*/5 * * * *')
+  }
+  agent {
+    node {
+      label 'nodejs'
+    }
+  }
+  stages {
+    stage ('Check resource drift') {
+      steps {
+      sh'''
+        oc diff -k config | tee drift-report.txt
+        ! test -s drift-report.txt
+      '''
+      }
+    }
+  }
+  post {
+    failure {
+      archiveArtifacts artifacts: '*.txt'
+      build job: 'apply/main'
+    }
+    success {
+      sh'''
+        rm drift-report.txt
+        echo "no drift reports, all uptodate" > no-drift.txt
+        archiveArtifacts artifacts: '*.txt'
+      '''
+    }
+  }
+}
